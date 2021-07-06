@@ -7,7 +7,7 @@ public class Test : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log (RedDotManager.instance.root.name);
+        RedDotManager.instance.GetTreeNode ("Main.Attack.Hp");
     }
 
     // Update is called once per frame

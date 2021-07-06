@@ -47,7 +47,41 @@ public class RedDotManager
 #region Method
     public TreeNode GetTreeNode (string path)
     {
-        return null;
+        if (string.IsNullOrEmpty(path))
+            return null;
+        
+        if (allNodes.TryGetValue (path, out var node))
+            return node;
+
+        var cur    = root;
+        int length = path.Length;
+
+        int startIndex = 0;
+
+        for (int i = 0; i < length; i++)
+        {
+            if (path[i].Equals (splitChar))
+            {
+                if (i == length - 1)
+                    throw new Exception ("路径非法，不能以分隔符结尾：" + path);
+
+                int endIndex = i - 1;
+                if (endIndex < startIndex)
+                    throw new Exception ("路径非法，不能存在连续分隔符或以分隔符开头：" + path);
+
+                TreeNode child = cur.GetOrAddChild (new RangeString (path, startIndex, endIndex));
+
+                startIndex = i + 1;
+
+                cur = child;
+            }
+        }
+
+        TreeNode target = cur.GetOrAddChild (new RangeString (path, startIndex, length - 1));
+        
+        allNodes.Add(path,target);
+
+        return target;
     }
 
     public bool RemoveTreeNode (string path)
