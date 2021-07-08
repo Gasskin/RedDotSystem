@@ -105,7 +105,7 @@ public class TreeNode
                 sum += child.Value.value;
             }
         }
-        InternalChangeValue (value);
+        InternalChangeValue (sum);
     }
 
     public TreeNode GetChild (RangeString key)
@@ -149,7 +149,17 @@ public class TreeNode
         {
             return false;
         }
-        return children.Remove (key);
+        var child = GetChild (key);
+
+        if (child != null) 
+        {
+            RedDotManager.instance.MarkDirtyNode (this);
+            children.Remove (key);
+            RedDotManager.instance.onNodeNumChanged?.Invoke ();
+            return true;
+        }
+        
+        return false;
     }
 
     public void RemoveAllChild ()
@@ -159,6 +169,8 @@ public class TreeNode
             return;
         }
         children.Clear();
+        RedDotManager.instance.MarkDirtyNode (this);
+        RedDotManager.instance.onNodeNumChanged?.Invoke();
     }
 #endregion
 
@@ -170,6 +182,7 @@ public class TreeNode
             return;
         this.value = value;
         onNodeChanged?.Invoke(value);
+        RedDotManager.instance.MarkDirtyNode (parent);
     }
 #endregion
 }

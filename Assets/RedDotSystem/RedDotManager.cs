@@ -10,6 +10,10 @@ public class RedDotManager
     private static RedDotManager _instance;
 
     private Dictionary<string, TreeNode> allNodes;
+
+    private HashSet<TreeNode> dirtyNodes;
+
+    private List<TreeNode> tempDirtyNodes;
 #endregion
 
 #region Property
@@ -33,16 +37,38 @@ public class RedDotManager
 #endregion
 
 
-#region Constructor
+#region Event
+    public Action onNodeNumChanged;
+#endregion
+    
+#region Lifetime
     public RedDotManager ()
     {
         splitChar           = '.';
         allNodes            = new Dictionary<string, TreeNode> ();
         root                = new TreeNode ("Root");
         cachedStringBuilder = new StringBuilder ();
+        dirtyNodes          = new HashSet<TreeNode> ();
+        tempDirtyNodes      = new List<TreeNode> ();
+    }
+
+    public void OnUpdate (float dt)
+    {
+        if (dirtyNodes.Count == 0)
+            return;
+
+        Debug.Log (1);
+        tempDirtyNodes.Clear();
+        foreach (TreeNode node in dirtyNodes)
+            tempDirtyNodes.Add(node);
+
+        dirtyNodes.Clear();
+
+        //处理所有脏节点
+        for (int i = 0; i < tempDirtyNodes.Count; i++)
+            tempDirtyNodes[i].ChangeValue();
     }
 #endregion
-
 
 #region Method
     public TreeNode GetTreeNode (string path)
@@ -129,6 +155,13 @@ public class RedDotManager
     {
         var node = GetTreeNode (path);
         return node == null ? 0 : node.value;
+    }
+
+    public void MarkDirtyNode (TreeNode node)
+    {
+        if (node == null || node.name == root.name)  
+            return;
+        dirtyNodes.Add (node);
     }
 #endregion
 }
